@@ -1,0 +1,27 @@
+{
+  "name": "database-migration",
+  "version": "1.0.0",
+  "description": "Modular database migration framework for extracting and inserting JSON data",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "extract": "node index.js",
+    "migrate": "bash scripts/RUN-MIGRATION.sh",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "migration",
+    "postgres",
+    "assets"
+  ],
+  "author": "Nitin Gupta",
+  "license": "ISC",
+  "dependencies": {
+    "pg": "^8.11.3",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
