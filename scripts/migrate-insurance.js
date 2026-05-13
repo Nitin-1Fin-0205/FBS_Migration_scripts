@@ -311,17 +311,7 @@ async function migrateInsurance() {
 }
 
 // ============================================================
-// 7. RUN MIGRATION
+// 7. MODULE EXPORT
 // ============================================================
-
-migrateInsurance()
-    .then(() => {
-        console.log('✅ Migration completed');
-        process.exit(0);
-    })
-    .catch((error) => {
-        console.error('❌ Migration failed:', error);
-        process.exit(1);
-    });
 
 module.exports = { migrateInsurance };

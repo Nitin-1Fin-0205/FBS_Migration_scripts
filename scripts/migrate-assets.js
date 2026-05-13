@@ -169,7 +169,7 @@ function extractAssetsFromJson(customerId, customerCode, cycle, parameters, crea
 
                 // Find matching SCID from subcategory
                 const match = ASSETS_CATEGORY_MAPPING.find(
-                    m => m.name.trim().toLowerCase() === assetClass.toLowerCase()
+                    m => m.name.trim().toLowerCase() === assetName.toLowerCase()
                 );
 
                 if (!match) {
@@ -178,9 +178,9 @@ function extractAssetsFromJson(customerId, customerCode, cycle, parameters, crea
 
                 assets.push({
                     user_code: customerCode,
-                    asset: assetName,
+                    asset: assetClass,
                     scid: match?.id || 0,
-                    sub_category: assetClass,
+                    sub_category: assetName,
                     market_amount: marketValue,
                     monthly_investment: monthlyInvestment,
                     cycle: cycle || 1,

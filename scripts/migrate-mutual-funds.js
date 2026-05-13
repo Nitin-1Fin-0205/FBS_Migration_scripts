@@ -277,17 +277,7 @@ async function migrateMutualFunds() {
 }
 
 // ============================================================
-// 6. RUN MIGRATION
+// 6. MODULE EXPORT
 // ============================================================
-
-migrateMutualFunds()
-    .then(() => {
-        console.log('✅ Migration completed');
-        process.exit(0);
-    })
-    .catch((error) => {
-        console.error('❌ Migration failed:', error);
-        process.exit(1);
-    });
 
 module.exports = { migrateMutualFunds };

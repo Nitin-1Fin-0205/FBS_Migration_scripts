@@ -27,6 +27,16 @@ const destPool = new Pool({
     database: process.env.DB_NAME1 || '',
 });
 
+// Set schema for destination pool using async initialization
+destPool.on('connect', async (client) => {
+    try {
+        const schema = process.env.DB_SCHEMA1 || 'public';
+        await client.query(`SET search_path TO ${schema}`);
+    } catch (err) {
+        console.error('Error setting schema:', err.message);
+    }
+});
+
 module.exports = {
     sourcePool,
     destPool,
