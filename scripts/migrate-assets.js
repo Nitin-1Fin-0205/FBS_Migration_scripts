@@ -19,7 +19,8 @@ async function createStagingTable() {
             monthly_investment DOUBLE PRECISION,
             cycle BIGINT,
             logged_at TIMESTAMP,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE (user_code, scid, cycle)
         );
     `;
 
@@ -71,7 +72,70 @@ async function* streamCustomerData() {
 }
 
 // ============================================================
-// 2. EXTRACT ASSETS FROM JSON
+// 2. ASSET CATEGORY MAPPING
+// ============================================================
+
+const ASSETS_CATEGORY_MAPPING = [
+    { id: 359, name: 'AIF' },
+    { id: 319, name: 'Aggressive Hybrid Fund' },
+    { id: 320, name: 'Arbitrage Fund' },
+    { id: 49, name: 'Atal Pension Yojana (APY)' },
+    { id: 322, name: 'Balance Hybrid Funds' },
+    { id: 321, name: 'Balanced Advantage' },
+    { id: 37, name: 'Bank FD' },
+    { id: 237, name: 'Bank RD' },
+    { id: 323, name: 'Capital Protection Funds' },
+    { id: 51, name: 'Coin Baskets' },
+    { id: 329, name: 'Commodity Funds' },
+    { id: 324, name: 'Conservative Hybrid Funds' },
+    { id: 38, name: 'Corporate FD' },
+    { id: 27, name: 'Debt Funds' },
+    { id: 337, name: 'Digital Gold' },
+    { id: 25, name: 'Direct Bonds' },
+    { id: 50, name: 'Direct Cryptos' },
+    { id: 325, name: 'Dynamic Asset Allocation' },
+    { id: 43, name: 'EPF' },
+    { id: 235, name: 'ESOPs' },
+    { id: 23, name: 'Equity ETFs' },
+    { id: 19, name: 'Equity Mutual Funds' },
+    { id: 326, name: 'Equity Savings' },
+    { id: 54, name: 'Free Debt Instruments' },
+    { id: 35, name: 'Gold ETFs' },
+    { id: 28, name: 'Hybrid Funds' },
+    { id: 24, name: 'International Funds' },
+    { id: 26, name: 'Liquid Debt Funds' },
+    { id: 53, name: 'Loans Given' },
+    { id: 327, name: 'Multi Asset Allocation' },
+    { id: 46, name: 'NPS Tier I' },
+    { id: 47, name: 'NPS Tier II' },
+    { id: 42, name: 'National Savings Certificate (NSC)' },
+    { id: 354, name: 'Non Performing Asset' },
+    { id: 32, name: 'Non-Yielding (Commercial)' },
+    { id: 31, name: 'Non-Yielding (Residential)' },
+    { id: 33, name: 'Occupied Home' },
+    { id: 328, name: 'Others' },
+    { id: 238, name: 'P2P Lending' },
+    { id: 358, name: 'PMS' },
+    { id: 44, name: 'PPF' },
+    { id: 34, name: 'Physical Gold' },
+    { id: 90, name: 'Physical Silver' },
+    { id: 39, name: 'Post Office Monthly Income Scheme (POMIS)' },
+    { id: 48, name: 'Pradhan Mantri Vaya Vandana Yojana (PMVVY)' },
+    { id: 18, name: 'Public Stocks (India)' },
+    { id: 22, name: 'Public Stocks (International)' },
+    { id: 236, name: 'REITs/InvITs' },
+    { id: 30, name: 'Rental Yielding (Commercial)' },
+    { id: 29, name: 'Rental Yielding (Residential)' },
+    { id: 45, name: 'Savings' },
+    { id: 40, name: 'Senior Citizen Savings Scheme (SCSS)' },
+    { id: 91, name: 'Silver ETFs' },
+    { id: 36, name: 'Sovereign Gold Bonds' },
+    { id: 41, name: 'Sukanya Samriddhi Yojana (SSY)' },
+    { id: 21, name: 'Unlisted Stocks' },
+];
+
+// ============================================================
+// 3. EXTRACT ASSETS FROM JSON
 // ============================================================
 
 function extractAssetsFromJson(customerId, customerCode, cycle, parameters, createdAt) {
@@ -103,10 +167,19 @@ function extractAssetsFromJson(customerId, customerCode, cycle, parameters, crea
 
                 if (!assetName || !assetClass) continue;
 
+                // Find matching SCID from subcategory
+                const match = ASSETS_CATEGORY_MAPPING.find(
+                    m => m.name.trim().toLowerCase() === assetClass.toLowerCase()
+                );
+
+                if (!match) {
+                    console.log(`[Customer ${customerId}] ⚠️  Asset: Category not found for: "${assetClass}"`);
+                }
+
                 assets.push({
                     user_code: customerCode,
                     asset: assetName,
-                    scid: 0,
+                    scid: match?.id || 0,
                     sub_category: assetClass,
                     market_amount: marketValue,
                     monthly_investment: monthlyInvestment,
@@ -153,7 +226,7 @@ async function insertAssetsBatch(assets) {
         INSERT INTO user_assets_history_staged 
         (user_code, asset, scid, sub_category, market_amount, monthly_investment, cycle, logged_at)
         VALUES ${values}
-        ON CONFLICT DO NOTHING;
+        ON CONFLICT (user_code, scid, cycle) DO NOTHING;
     `;
 
     try {

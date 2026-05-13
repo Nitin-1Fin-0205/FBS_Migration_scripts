@@ -1,5 +1,7 @@
 const { migrateAssets } = require('./scripts/migrate-assets');
 const { migrateLiabilities } = require('./scripts/migrate-liabilities');
+const { migrateInsurance } = require('./scripts/migrate-insurance');
+const { migrateMutualFunds } = require('./scripts/migrate-mutual-funds');
 const { migrateCreditCards } = require('./scripts/migrate-credit-cards');
 const { migrateFinancialScorecard } = require('./scripts/migrate-financial-scorecard');
 
@@ -25,6 +27,14 @@ async function runMigration() {
             console.log('✅ Liabilities migration\n');
             console.log('Step 2: Starting liabilities migration...');
             await migrateLiabilities();
+        } else if (migationType === 'insurance') {
+            console.log('✅ Insurance migration\n');
+            console.log('Step 2: Starting insurance migration...');
+            await migrateInsurance();
+        } else if (migationType === 'mutual-funds') {
+            console.log('✅ Mutual funds migration\n');
+            console.log('Step 2: Starting mutual funds migration...');
+            await migrateMutualFunds();
         } else if (migationType === 'credit-cards') {
             console.log('✅ Credit cards migration\n');
             console.log('Step 2: Starting credit cards migration...');
@@ -37,6 +47,8 @@ async function runMigration() {
             console.error(`Unknown migration type: ${migationType}`);
             console.log('  npm start                               # Run assets migration (default)');
             console.log('  npm start liabilities                   # Run liabilities migration');
+            console.log('  npm start insurance                     # Run insurance migration');
+            console.log('  npm start mutual-funds                  # Run mutual funds migration');
             console.log('  npm start credit-cards                  # Run credit cards migration');
             console.log('  npm start financial-scorecard           # Run financial scorecard migration');
             process.exit(1);
